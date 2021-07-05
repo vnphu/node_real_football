@@ -1,0 +1,15 @@
+version: '3.0'
+
+services:
+  server:
+    container_name: realfootball-server
+    build:
+      context: .
+    restart: always
+    env_file:
+      - .env
+    network_mode: 'host'
+    ports:
+      - '3000:3000'
+    expose:
+      - '3000'

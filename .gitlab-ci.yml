@@ -1,0 +1,36 @@
+image: gitlab/gitlab-runner:latest
+
+services:
+  - node:13.2.0
+
+variables:
+  DOCKER_TLS_CERTDIR: ''
+  DOCKER_DRIVER: overlay
+
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  script:
+    - docker build --rm -t $CI_REGISTRY/$CI_PROJECT_PATH:latest .
+    - docker push $CI_REGISTRY/$CI_PROJECT_PATH:latest
+  only:
+    - master
+  tags:
+    - docker
+
+deploy:
+  stage: deploy
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CI_REGISTRY/$CI_PROJECT_PATH:latest
+    - docker-compose up -d
+  only:
+    - master
+  tags:
+    - deploy
